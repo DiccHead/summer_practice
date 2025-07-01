@@ -31,7 +31,7 @@ class AddChat(BaseModel):
 class AddMessage(BaseModel):
     # id: uuid.UUID = Field(primary_key=True, default=None)
     author: str
-    chat: str
+    chat: uuid.UUID
     # date_time: datetime
     read_list: str = ""
     # is_edited: bool
@@ -220,7 +220,7 @@ def deleteChatById(id: uuid.UUID):
             chat = result.one()
             session.delete(chat)
             session.commit()
-            return "Edited chat successfuly"
+            return "Deleted chat successfuly"
         except:
             return HandleErrors()
 
@@ -237,6 +237,22 @@ def updateChatUserList(id: uuid.UUID, input: str):
             return "Updated user list successfuly"
         except:
             return HandleErrors()
+        
+
+def getAllChatsOfUser(username: str):
+    with Session(engine) as session:
+        statement = select(Chat)
+        result = session.exec(statement)
+        chat_list = []
+        for chat in result:
+            chat_list.append(chat)
+        final_chat_list = []
+        for i in chat_list:
+            x = i.user_list.split()
+            if username in x:
+                final_chat_list.append(i)
+
+        return final_chat_list
         
 
 #MESSAGES:
@@ -263,7 +279,7 @@ def getMessageById(id: uuid.UUID):
 
 def addMessage(message_input: AddMessage):
     message_input = message_input.model_dump()
-    message = Message(id=uuid.uuid1(), date_time=datetime.now(), **message_input)
+    message = Message(id=uuid.uuid1(), date_time=datetime.now(), is_edited=False, **message_input)
     with Session(engine) as session:
         try:
             session.add(message)

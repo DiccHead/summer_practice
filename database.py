@@ -29,7 +29,7 @@ class Chat(SQLModel, table=True):
 class Message(SQLModel, table=True):
     id: uuid.UUID = Field(primary_key=True, default=None)
     author: str
-    chat: str
+    chat: uuid.UUID
     date_time: datetime
     read_list: str
     is_edited: bool
