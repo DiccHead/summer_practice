@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import Any
 from pydantic import BaseModel
 import uuid
-from fastapi import APIRouter, Cookie, Depends, Response, Request
-from db_manager import getUserByName
+from fastapi import APIRouter, Depends, Response, Request
+from db_manager import getUserByName, updateUserLastOnline
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -16,6 +16,7 @@ class UserSessionData(BaseModel):
     last_online: datetime
     chatlist: str
     active_chat: str
+    last_logged_in: datetime
 
 COOKIES: dict[str, UserSessionData] = {}
 COOKIE_SESSION_ID_KEY = "web-app-session-id"
@@ -25,8 +26,11 @@ def auth(username: str, password: str):
     user = getUserByName(username)
     if user != "There is no such user":
         if user.password == password:
+            now = datetime.now()
+            updateUserLastOnline(name=user.username, last_online=now)
+            user.last_online = now
             user = user.model_dump()
-            user = UserSessionData(**user)
+            user = UserSessionData(**user, last_logged_in=now)
             return user, True
         else:
             return "Invalid Password", False
@@ -40,9 +44,13 @@ def generate_session_id():
 def get_session_data(request: Request) -> dict:
     try:
         session_id = request.cookies.get(COOKIE_SESSION_ID_KEY)
-        return COOKIES[session_id]
+        now = datetime.now()
+        user = COOKIES[session_id]
+        user.last_online = now
+        updateUserLastOnline(user.username, now)
+        return user
     except:
-        return {"status": "Not authenticated"}
+        return "Guest"
 
 
 
@@ -66,6 +74,8 @@ def check_cookie(user_session_data: UserSessionData = Depends(get_session_data))
 def logout(response: Response, request: Request):
     try:
         session_id = request.cookies.get(COOKIE_SESSION_ID_KEY)
+        now = datetime.now()
+        updateUserLastOnline(COOKIES[session_id].username, now)
         COOKIES.pop(session_id)
         response.delete_cookie(COOKIE_SESSION_ID_KEY)
         return "Goodbye"
