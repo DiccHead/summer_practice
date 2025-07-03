@@ -1,0 +1,33 @@
+{% extends 'base_template.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block body %}
+
+<section class="bg-dark text-light p-5 text-center">
+    <div class="container">
+        <h1 class="text-primary mb-3">Регистрация</h1>
+        <div class="bg-light p-5 text-primary text-start" style="border-radius: 10px;">
+            <form action="/forms/create_user" class="p-3" method="post">
+                <div class="pb-3">
+                    <label for="usernameInput" class="form-label">Имя пользователя:</label>
+                    <input type="text" class="form-control" id="usernameInput" placeholder="username" name="username">
+                </div>
+                <div class="pb-3">
+                    <label for="passwordInput" class="form-label">Пароль:</label>
+                    <input type="password" class="form-control" id="passwordInput" placeholder="password"
+                        name="password">
+                </div>
+                <div class="text-danger pb-2">
+                    {{invalid_msg}}
+                </div>
+                <div class="pb-3">
+                    <input type="submit" class="btn btn-primary" value="Регистрация">
+                </div>
+
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

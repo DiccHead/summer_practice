@@ -323,7 +323,7 @@ def deleteMessageById(id: uuid.UUID):
 
 def readAllMessagesInChat(id: uuid.UUID):
     with Session(engine) as session:
-        statement = select(Message).where(Message.chat == id)
+        statement = select(Message).where(Message.chat == id).order_by(Message.date_time)
         result = session.exec(statement)
         message_list = []
         for message in result:

@@ -1,0 +1,9 @@
+{% from 'macros.html' import chat_element %}
+<div class="row text-light bg-dark p-3">
+    <div class="col-1 rounded-circle bg-secondary me-2 py-1 text-center"><i class="bi bi-search"></i></div>
+    <div class="col bg-secondary rounded-pill text-left py-1">Поиск</div>
+</div>
+{% for chat in chats %}
+{{ chat_element(picture=chat.picture, name=chat.name, last_message=chat.last_message, msg_time=chat.msg_time,
+is_read=chat.is_read, is_active=chat.is_active) }}
+{% endfor %}

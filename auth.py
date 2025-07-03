@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import uuid
-from fastapi import APIRouter, Depends, Response, Request
+from fastapi import APIRouter, Depends, Form, Response, Request
 from db_manager import getUserByName, updateUserLastOnline
 
 
@@ -55,14 +56,15 @@ def get_session_data(request: Request) -> dict:
 
 
 @router.post("/login")
-def login(username: str, password: str, response: Response):
+def login(username: str = Form(), password: str = Form()):
     user, is_ok = auth(username, password)
     if is_ok:
         session_id = generate_session_id()
         COOKIES[session_id] = user
-        response.set_cookie(COOKIE_SESSION_ID_KEY, session_id)
-        return "Success"
-    return user
+        template_response = RedirectResponse(url='/', status_code=303)
+        template_response.set_cookie(COOKIE_SESSION_ID_KEY, session_id)
+        return template_response
+    return RedirectResponse(url='/log-in?invalid_msg=Неправильное%20имя%20пользователя%20или%20пароль', status_code=303)
 
 
 @router.get("/check-cookie")

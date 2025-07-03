@@ -19,14 +19,14 @@ def main_page(request: Request, user: UserSessionData = Depends(get_session_data
 
 
 @router.get("/log-in", response_class=HTMLResponse)
-def log_in_page(request: Request):
-    response = templates.TemplateResponse("index.html", context={'request': request, 'page_name': 'log in'})
+def log_in_page(request: Request, invalid_msg: str = " "):
+    response = templates.TemplateResponse("login_page.html", context={'request': request, 'invalid_msg': invalid_msg})
     return response
 
 
 @router.get("/sing-up", response_class=HTMLResponse)
-def sing_up_page(request: Request):
-    response = templates.TemplateResponse("index.html", context={'request': request, 'page_name': 'sing up'})
+def sing_up_page(request: Request, invalid_msg: str = " "):
+    response = templates.TemplateResponse("singup_page.html", context={'request': request, 'invalid_msg': invalid_msg})
     return response
 
 
@@ -35,7 +35,7 @@ def chats_page(request: Request, user: UserSessionData = Depends(get_session_dat
     if user == "Guest":
         response = RedirectResponse(url='/log-in', status_code=303)
         return response
-    response = templates.TemplateResponse("index.html", context={'request': request, 'page_name': 'chats'})
+    response = templates.TemplateResponse("chats_page.html", context={'request': request, 'page_name': 'chats'})
     return response
 
 
