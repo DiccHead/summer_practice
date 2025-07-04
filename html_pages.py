@@ -31,11 +31,11 @@ def sing_up_page(request: Request, invalid_msg: str = " "):
 
 
 @router.get("/chats", response_class=HTMLResponse)
-def chats_page(request: Request, user: UserSessionData = Depends(get_session_data)):
+def chats_page(request: Request, active_chat: bool = False, user: UserSessionData = Depends(get_session_data)):
     if user == "Guest":
         response = RedirectResponse(url='/log-in', status_code=303)
         return response
-    response = templates.TemplateResponse("chats_page.html", context={'request': request, 'page_name': 'chats'})
+    response = templates.TemplateResponse("chats_page.html", context={'request': request, 'page_name': 'chats', 'active_chat': active_chat})
     return response
 
 

@@ -3,38 +3,18 @@
 {% block title %}Чаты{% endblock %}
 
 {% block body %}
-<div class="row h-100">
+<div class="row h-100 overflow-hidden">
+    <div hx-get="/element/chatlist" hx-trigger="every 1s" hx-target="#left_panel" hidden></div>
     <div class="col-sm-3 d-none d-md-block col-0 ps-4 text-center bg-dark border border-right border-dark border-3"
         hx-get="/element/chatlist" hx-trigger="load" id="left_panel">Empty</div>
     <div class="col-md-9 bg-dark text-light p-5"
-        style=" background-image: url('https://i.pinimg.com/originals/70/70/e8/7070e81aa2602302bd79198e2d5f857d.jpg');"
+        style="background-image: url('https://i.pinimg.com/originals/70/70/e8/7070e81aa2602302bd79198e2d5f857d.jpg');"
         id="active_chat">
-        <div class="row p-3 d-flex flex-column-reverse" style="height: 92%;">
-            <div class="row" style="height: 50px;">
-                <div class="col bg-dark rounded h-100">Сообщение собеседника</div>
-                <div class="col h-100"></div>
-            </div>
-            <div class="row" style="height: 50px;">
-                <div class="col h-100"></div>
-                <div class="col bg-info rounded h-100">Моё сообщение</div>
-            </div>
-        </div>
-        <div class="row bg-dark rounded" style="height: 8%;">
-            <form class="p-3 row" method="post" action="/auth/login" enctype="multipart/form-data">
-                <div class="col-10">
-                    <input type="text" class="form-control" id="messageInput" placeholder="Введите сообщение"
-                        name="message_content">
-                </div>
-                <div class="col">
-                    <button type="submit" class="btn btn-primary rounded-circle"><i
-                            class="bi bi-send-fill"></i></button>
-                </div>
-                <div class="col-1">
-                    <input type="file" name="photo" class="btn btn-secondary rounded" />
-                </div>
-            </form>
-        </div>
     </div>
 </div>
+
+{% if active_chat %}
+<div hx-target="#active_chat" hx-trigger="load" hx-get="/element/open_chat?active_chat=True" hidden></div>
+{% endif %}
 
 {% endblock %}

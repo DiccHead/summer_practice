@@ -1,10 +1,10 @@
-{% macro chat_element(picture, name, last_message, msg_time, is_read, is_active) %}
+{% macro chat_element(picture, name, last_message, msg_time, is_read, is_active, id) %}
 <div class="row text-light 
     {% if is_active == True %}
     bg-secondary
     {% else %}
     bg-dark
-    {% endif %} p-2">
+    {% endif %} p-2" hx-target="#active_chat" hx-trigger="click" hx-get="/element/open_chat?chat_id={{id}}">
     <div class="col rounded-circle bg-secondary"><i class="bi bi-person-fill"></i></div>
     <div class="col-10 ps-4">
         <div class="row">
@@ -24,4 +24,21 @@
         </div>
     </div>
 </div>
+{% endmacro %}
+
+
+{% macro message(is_mine, content) %}
+{% if is_mine %}
+<div style="min-height: 50px;" class="mt-2 d-flex flex-row-reverse">
+    <div style="height: 100%; max-width: 45%;" class="bg-info rounded p-2 d-flex align-items-end flex-row-reverse">
+        <div>{{content}}</div>
+    </div>
+</div>
+{% else %}
+<div style="min-height: 50px;" class="mt-2 d-flex flex-row">
+    <div style="height: 100%; max-width: 45%;" class="bg-dark rounded p-2 d-flex align-items-end flex-row">
+        <div>{{content}}</div>
+    </div>
+</div>
+{% endif %}
 {% endmacro %}

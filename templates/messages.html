@@ -1,0 +1,7 @@
+{% from 'macros.html' import message %}
+
+<div class="d-flex flex-column-reverse p-2" style="transform: rotateX(180deg);">
+    {% for i in messages %}
+    {{ message(i.is_mine, i.content) }}
+    {% endfor %}
+</div>
