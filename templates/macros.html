@@ -5,7 +5,7 @@
     {% else %}
     bg-dark
     {% endif %} p-2" hx-target="#active_chat" hx-trigger="click" hx-get="/element/open_chat?chat_id={{id}}">
-    <div class="col rounded-circle bg-secondary"><i class="bi bi-person-fill"></i></div>
+    <div class="col rounded-circle bg-secondary"><img src="/user_files/chat_pictures/{{picture}}.jpg" alt=""></div>
     <div class="col-10 ps-4">
         <div class="row">
             <div class="col-9">
@@ -27,18 +27,48 @@
 {% endmacro %}
 
 
-{% macro message(is_mine, content) %}
+{% macro message(is_mine, content, author, is_read, id, is_edited) %}
 {% if is_mine %}
-<div style="min-height: 50px;" class="mt-2 d-flex flex-row-reverse">
+<div style="min-height: 50px; word-break: break-all;" class="mt-2 d-flex flex-row-reverse" data-bs-toggle="modal"
+    data-bs-target="#exampleModal" hx-target="#modal-content" hx-get="/element/edit_message_form?message_id={{id}}"
+    hx-trigger="click">
     <div style="height: 100%; max-width: 45%;" class="bg-info rounded p-2 d-flex align-items-end flex-row-reverse">
-        <div>{{content}}</div>
+        <div>{{content}} {% if is_read %}<i class="bi bi-check2-all"></i>{% else %}<i class="bi bi-check2"></i>{% endif
+            %} <br>
+            {% if is_edited %}
+            <div class="text-secondary">изменено</div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% else %}
-<div style="min-height: 50px;" class="mt-2 d-flex flex-row">
-    <div style="height: 100%; max-width: 45%;" class="bg-dark rounded p-2 d-flex align-items-end flex-row">
-        <div>{{content}}</div>
+<div style="min-height: 50px; word-break: break-all;" class="mt-2 d-flex flex-row">
+    <div style="height: 100%; max-width: 45%;" class="bg-dark rounded p-2">
+        <div class="d-flex align-items-end flex-row text-info">{{author}}:</div>
+        <div class="d-flex align-items-end flex-row">{{content}}</div>
+        {% if is_edited %}
+        <div class="d-flex align-items-end flex-row text-secondary">изменено</div>
+        {% endif %}
     </div>
 </div>
 {% endif %}
+{% endmacro %}
+
+
+{% macro modal() %}
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal-content">
+                Редактирование сообщения
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endmacro %}

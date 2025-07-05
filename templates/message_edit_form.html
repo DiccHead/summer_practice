@@ -1,0 +1,13 @@
+<h5 class="modal-title" id="exampleModalLabel">Редактировать сообщение</h5>
+<form class="p-3 row" method="post" action="/forms/edit_message" ;>
+    <div class="col-10">
+        <input type="text" class="form-control" id="messageInput" value="{{content}}" name="content">
+    </div>
+    <input type="text" name="message_id" value="{{message_id}}" hidden>
+    <div class="col">
+        <button type="submit" class="btn btn-primary rounded-circle"><i class="bi bi-pencil-fill"></i></button>
+    </div>
+</form>
+<button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+    hx-post="/forms/delete_message?message_id={{message_id}}&username={{username}}" hx-trigger="click">Удалить
+    сообщение</button>

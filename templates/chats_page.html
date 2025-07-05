@@ -1,4 +1,5 @@
 {% extends 'base_template.html' %}
+{% from 'macros.html' import modal %}
 
 {% block title %}Чаты{% endblock %}
 
@@ -13,8 +14,6 @@
     </div>
 </div>
 
-{% if active_chat %}
 <div hx-target="#active_chat" hx-trigger="load" hx-get="/element/open_chat?active_chat=True" hidden></div>
-{% endif %}
-
+{{ modal() }}
 {% endblock %}

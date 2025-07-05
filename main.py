@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from test_endpoints import router as test_endpoint
 from html_pages import router as html_pages
@@ -14,3 +15,5 @@ app.include_router(auth)
 app.include_router(forms)
 app.include_router(elements)
 app.include_router(test_endpoint)
+
+app.mount("/user_files", StaticFiles(directory="user_files"), name="user_files")

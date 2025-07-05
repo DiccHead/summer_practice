@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from auth import UserSessionData, get_session_data
-from db_manager import getAllChatsOfUser, readAllMessagesInChat, getUserByName, updateMessageReadList, updateUserActiveChat
+from db_manager import getAllChatsOfUser, readAllMessagesInChat, getUserByName, updateMessageReadList, updateUserActiveChat, getMessageById
 from pydantic import BaseModel
 from datetime import datetime
 import uuid
@@ -26,6 +26,9 @@ class Message(BaseModel):
     id: uuid.UUID
     is_mine: bool
     content: str
+    is_read: bool
+    author: str
+    is_edited: bool
 
 
 @router.get("/chatlist", response_class=HTMLResponse)
@@ -81,12 +84,35 @@ def get_messages(request: Request, chat_id: uuid.UUID, user: UserSessionData = D
         messages = readAllMessagesInChat(chat_id)
         message_list= []
         for i in messages:
-            read_list = i.read_list + " " + user.username
+            if user.username not in i.read_list.split():
+                read_list = i.read_list + " " + user.username
+            else:
+                read_list = i.read_list
+            x = [x for x in read_list.split() if x != user.username]
+            is_read = False
+            if len(x) > 0:
+                is_read = True
             updateMessageReadList(i.id, read_list)
-            message = Message(id=i.id, is_mine=False, content=i.content)
+            message = Message(id=i.id, is_mine=False, content=i.content, author=i.author, is_read=is_read, is_edited=i.is_edited)
             if user.username == i.author:
-                message = Message(id=i.id, is_mine=True, content=i.content)
+                message = Message(id=i.id, is_mine=True, content=i.content, author=i.author, is_read=is_read, is_edited=i.is_edited)
             message_list.append(message)
         message_list = message_list[::-1]
         response = templates.TemplateResponse("messages.html", context={'request': request, 'messages': message_list})
         return response
+    
+
+@router.get("/edit_message_form", response_class=HTMLResponse)
+def edit_message_form(request: Request, message_id: uuid.UUID, user: UserSessionData = Depends(get_session_data)):
+    message = getMessageById(message_id)
+    user = getUserByName(user.username)
+    if message.author == user.username:
+        response = templates.TemplateResponse("message_edit_form.html", context={'request': request, 'message_id': message_id, 'content': message.content, 'username': user.username})
+        return response
+    
+
+@router.get("/new_chat_form", response_class=HTMLResponse)
+def new_chat_form(request: Request, user: UserSessionData = Depends(get_session_data)):
+    user = getUserByName(user.username)
+    response = templates.TemplateResponse("create_chat_form.html", context={'request': request, 'username': user.username})
+    return response

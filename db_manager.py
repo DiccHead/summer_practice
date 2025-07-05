@@ -190,7 +190,7 @@ def addChat(chat_input: AddChat):
         try:
             session.add(chat)
             session.commit()
-            return "Chat added successfuly!"
+            return "Chat added successfuly!", chat.id
         except:
             return "Something went wrong I guess? If you're reading this, it must be that I forgot to put an error handling function here..."
 
@@ -235,6 +235,20 @@ def updateChatUserList(id: uuid.UUID, input: str):
             session.add(chat)
             session.commit()
             return "Updated user list successfuly"
+        except:
+            return HandleErrors()
+        
+
+def updateChatPicture(id: uuid.UUID, input: str):
+    with Session(engine) as session:
+        statement = select(Chat).where(Chat.id == id)
+        result = session.exec(statement)
+        try:
+            chat = result.one()
+            chat.picture = input
+            session.add(chat)
+            session.commit()
+            return "Updated picture successfuly"
         except:
             return HandleErrors()
         

@@ -2,6 +2,6 @@
 
 <div class="d-flex flex-column-reverse p-2" style="transform: rotateX(180deg);">
     {% for i in messages %}
-    {{ message(i.is_mine, i.content) }}
+    {{ message(i.is_mine, i.content, i.author, i.is_read, i.id, i.is_edited) }}
     {% endfor %}
 </div>

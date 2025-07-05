@@ -1,0 +1,15 @@
+<h5 class="modal-title" id="exampleModalLabel">Создать чат</h5>
+<form class="p-3 row" method="post" action="/forms/create_chat" enctype="multipart/form-data">
+    <div class="col-7">
+        <input type="text" class="form-control" id="chatName" value="Новый чат" name="chat_name">
+    </div>
+    <div class="col-3">
+        <input type="file" class="form-control" id="chatPicture" name="chat_picture" value="">
+    </div>
+    <p class="text-warning">Изображение должно иметь разрешение 50 на 50 пикселей</p>
+    <input type="text" name="username" value="{{username}}" hidden>
+    <div class="col">
+        <button type="submit" class="btn btn-primary rounded-circle" data-bs-dismiss="modal"><i
+                class="bi bi-plus-lg"></i></button>
+    </div>
+</form>
