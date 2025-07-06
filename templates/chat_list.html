@@ -1,5 +1,5 @@
 {% from 'macros.html' import chat_element %}
-<div>
+<!-- <div>
     <div class="row text-light bg-dark p-3">
         <div class="col-1 rounded-circle bg-secondary me-2 py-1 d-flex justify-content-center"><i
                 class="bi bi-search"></i>
@@ -10,13 +10,13 @@
             hx-trigger="click"><i class="bi bi-plus-lg"></i>
         </div>
     </div>
-    <div style="overflow-x: hidden; overflow-y: auto; position: fixed; width: 23%; height: 100%;">
-        <div class="d-flex flex-column">
-            {% for chat in chats %}
-            {{ chat_element(picture=chat.picture, name=chat.name, last_message=chat.last_message,
-            msg_time=chat.msg_time,
-            is_read=chat.is_read, is_active=chat.is_active, id=chat.id) }}
-            {% endfor %}
-        </div>
-    </div>
+    <div style="overflow-x: hidden; overflow-y: auto; position: fixed; width: 23%; height: 100%;"> -->
+<div class="d-flex flex-column">
+    {% for chat in chats %}
+    {{ chat_element(picture=chat.picture, name=chat.name, last_message=chat.last_message,
+    msg_time=chat.msg_time,
+    is_read=chat.is_read, is_active=chat.is_active, id=chat.id) }}
+    {% endfor %}
 </div>
+<!-- </div>
+</div> -->

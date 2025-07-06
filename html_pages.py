@@ -46,3 +46,9 @@ def user_profile_page(request: Request, username: str, user: UserSessionData = D
         return response
     response = templates.TemplateResponse("index.html", context={'request': request, 'page_name': username})
     return response
+
+
+@router.get("/warning")
+def photo_warning(request: Request, error: str = ""):
+    response = templates.TemplateResponse("photo_warning.html", context={'request': request, 'error': error})
+    return response

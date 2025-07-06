@@ -1,11 +1,9 @@
 {% macro chat_element(picture, name, last_message, msg_time, is_read, is_active, id) %}
-<div class="row text-light 
-    {% if is_active == True %}
-    bg-secondary
-    {% else %}
-    bg-dark
-    {% endif %} p-2" hx-target="#active_chat" hx-trigger="click" hx-get="/element/open_chat?chat_id={{id}}">
-    <div class="col rounded-circle bg-secondary"><img src="/user_files/chat_pictures/{{picture}}.jpg" alt=""></div>
+<div {% if is_active==True %} class="row text-light bg-secondary p-2" {% else %} class="row text-light bg-dark p-2"
+    hx-target="#active_chat" hx-trigger="click" hx-get="/element/open_chat?chat_id={{id}}" {% endif %}>
+    <div class="rounded-circle bg-secondary ms-2" style="width: 55px; height: 55px; overflow: hidden;"><img
+            src="/user_files/chat_pictures/{{picture}}.jpg" alt=""
+            style="width: 55px; height: auto; position: relative; left: -12px;"></div>
     <div class="col-10 ps-4">
         <div class="row">
             <div class="col-9">
@@ -67,6 +65,33 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro top_bar(chat) %}
+<div class="position-fixed bg-dark text-light right-0 top-0 p-3 d-flex flex-row align-items-center"
+    style="height: 10%; width: 100%; z-index: 2;" data-bs-toggle="modal" data-bs-target="#exampleModal"
+    hx-target="#modal-content" hx-get="/element/edit_chat_form?chat_id={{chat.id}}" hx-trigger="click">
+    <div class="rounded-circle overflow-hidden" style="height: 100px; width: 100px;"><img
+            src="/user_files/chat_pictures/{{chat.picture}}.jpg" alt="" style="width: 100px; height: auto;"></div>
+    <h4 class="ms-3">{{chat.name}}</h4>
+</div>
+{% endmacro %}
+
+
+{% macro user_element(picture, name) %}
+<div class="row text-light bg-dark p-2" hx-target="#active_chat" hx-trigger="click" hx-get="/user/{{name}}">
+    <div class="rounded-circle bg-secondary ms-2" style="width: 55px; height: 55px; overflow: hidden;"><img
+            src="/user_files/user_pictures/{{picture}}.jpg" alt=""
+            style="width: 55px; height: auto; position: relative; left: -12px;"></div>
+    <div class="col-10 ps-4">
+        <div class="row">
+            <div class="col-9 text-start">
+                <h5>{{name}}</h5>
             </div>
         </div>
     </div>

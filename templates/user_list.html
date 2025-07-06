@@ -1,0 +1,10 @@
+{% from 'macros.html' import user_element %}
+{% if not nothing %}
+<div class="d-flex flex-column">
+    {% for user in users %}
+    {{ user_element(picture=user.profile_pic, name=user.username) }}
+    {% endfor %}
+</div>
+{% else %}
+<h4 class="text-warning">Ничего не найдено</h4>
+{% endif %}

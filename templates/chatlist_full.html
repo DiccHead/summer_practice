@@ -1,0 +1,17 @@
+<div>
+    <div class="row text-light bg-dark p-3">
+        <div class="col-1 rounded-circle bg-secondary me-2 py-1 d-flex justify-content-center" hx-target="#right_panel"
+            hx-trigger="click" hx-get="/element/get_search"><i class="bi bi-search"></i>
+        </div>
+        <div class="col bg-secondary rounded-pill text-start py-1" hx-target="#right_panel" hx-trigger="click"
+            hx-get="/element/get_search">Поиск</div>
+        <div class="col-1 rounded-circle bg-primary ms-2 py-1 d-flex justify-content-center" data-bs-toggle="modal"
+            data-bs-target="#exampleModal" hx-target="#modal-content" hx-get="/element/new_chat_form"
+            hx-trigger="click"><i class="bi bi-plus-lg"></i>
+        </div>
+    </div>
+    <div style="overflow-x: hidden; overflow-y: auto; position: fixed; width: 23%; height: 100%;" id="left_panel">
+
+    </div>
+</div>
+<div hx-get="/element/chatlist" hx-trigger="load" hx-target="#left_panel" hidden></div>

@@ -1,0 +1,15 @@
+<div>
+    <div class="row text-light bg-dark p-3">
+        <form hx-get="/forms/search_user" hx-trigger="change, load" hx-target="#search_panel"
+            action="javascript:void(0);" class="col">
+            <input name="search_request" class="bg-secondary rounded-pill text-start py-1 w-100 ps-2" type="text"
+                placeholder="Поиск">
+        </form>
+        <button type="button" class="btn-close btn-close-white ms-2 mt-1" aria-label="Close" hx-target="#right_panel"
+            hx-get="/element/back_to_chatlist" hx-trigger="click"></button>
+    </div>
+    <div style="overflow-x: hidden; overflow-y: auto; position: fixed; width: 23%; height: 100%;" id="search_panel">
+
+    </div>
+</div>
+<div id="left_panel" hidden></div>

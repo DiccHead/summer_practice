@@ -39,6 +39,16 @@ class AddMessage(BaseModel):
     media: str = ""
 
 
+class ChatSort(BaseModel):
+    id: uuid.UUID
+    name: str
+    picture: str
+    user_list: str
+    creation_date: datetime
+    moderator_list: str
+    last_message: datetime
+
+
 
 #Функции для взаимодействия с базой данных
 
@@ -239,6 +249,20 @@ def updateChatUserList(id: uuid.UUID, input: str):
             return HandleErrors()
         
 
+def updateChatModeratorList(id: uuid.UUID, input: str):
+    with Session(engine) as session:
+        statement = select(Chat).where(Chat.id == id)
+        result = session.exec(statement)
+        try:
+            chat = result.one()
+            chat.moderator_list = input
+            session.add(chat)
+            session.commit()
+            return "Updated moderator list successfuly"
+        except:
+            return HandleErrors()
+        
+
 def updateChatPicture(id: uuid.UUID, input: str):
     with Session(engine) as session:
         statement = select(Chat).where(Chat.id == id)
@@ -265,8 +289,24 @@ def getAllChatsOfUser(username: str):
             x = i.user_list.split()
             if username in x:
                 final_chat_list.append(i)
+        list_to_sort = []
+        for i in final_chat_list:
+            messages = readAllMessagesInChat(i.id)
+            i = i.model_dump()
+            if messages != []:
+                last_message = messages[::-1][0]
+                i = ChatSort(**i, last_message=last_message.date_time)
+            else:
+                i = ChatSort(**i, last_message=i['creation_date'])
+            list_to_sort.append(i)
+        list_to_sort = sorted(list_to_sort, key=lambda x: x.last_message)
+        final_chat_list = []
+        for i in list_to_sort:
+            i = i.model_dump()
+            i = Chat(**i)
+            final_chat_list.append(i)
 
-        return final_chat_list
+        return final_chat_list[::-1]
         
 
 #MESSAGES:
@@ -357,3 +397,22 @@ def readAllMessagesInChat(id: uuid.UUID):
         for message in result:
             message_list.append(message)
         return message_list
+    
+
+def user_search(text_request: str):
+    if text_request == "":
+        with Session(engine) as session:
+            user_list = []
+            statement = select(User)
+            result = session.exec(statement)
+            for user in result:
+                user_list.append(user)
+            return user_list
+    else:
+        with Session(engine) as session:
+            user_list = []
+            statement = select(User).where(User.username.contains(text_request))
+            result = session.exec(statement)
+            for user in result:
+                user_list.append(user)
+            return user_list

@@ -6,6 +6,8 @@
 <div class="col">
     <button type="submit" class="btn btn-primary rounded-circle"><i class="bi bi-send-fill"></i></button>
 </div>
+<div hx-get="/element/chatlist" hx-trigger="load" hx-target="#left_panel" hidden></div>
+<div hx-trigger="load" hx-get="/element/get_messages?chat_id={{ id }}" hx-target="#message_box" hidden></div>
 <!-- <div class="col-1">
             <input type="file" name="photo" class="btn btn-secondary rounded" />
         </div> -->

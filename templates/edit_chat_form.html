@@ -1,0 +1,35 @@
+<h5 class="modal-title" id="exampleModalLabel">Редактировать чат</h5>
+<form class="p-3 col" method="post" action="/forms/edit_chat" enctype="multipart/form-data">
+    <div class="row mb-2">
+        <label for="name" class="form-label">Название чата:</label>
+        <input type="text" name="name" class="form-control" id="name" value="{{name}}">
+    </div>
+    <div class="row mb-2">
+        <label for="user_list" class="form-label">Список пользователей в чате (имена пользователей через
+            пробел):</label>
+        <input type="text" name="user_list" class="form-control" id="user_list" value="{{user_list}}">
+    </div>
+    <div class="row mb-2">
+        <label for="moderator_list" class="form-label">Список админов чата (имена пользователей через пробел):</label>
+        <input type="text" {% if not is_admin %} disabled {% endif %} name="moderator_list" class="form-control"
+            id="moderator_list" value="{{moderator_list}}">
+    </div>
+    {% if not is_admin %}
+    <input type="text" value="{{moderator_list}}" name="moderator_list" hidden>
+    {% endif %}
+    <div class="row mb-2">
+        <label for="picture" class="form-label">Изображение чата:</label>
+        <input type="file" name="chat_picture" class="form-control" id="picture">
+    </div>
+    <input type="text" name="chat_id" value="{{id}}" hidden>
+    <input type="text" name="username" value="{{username}}" hidden>
+    <div class="row mb-2">
+        <button type="submit" class="btn btn-primary rounded">Сохранить изменения</button>
+    </div>
+</form>
+<button class="btn btn-danger" hx-trigger="click" hx-post="/forms/leave_chat?chat_id={{id}}"
+    data-bs-dismiss="modal">Покинуть чат</button>
+{% if is_admin %}
+<button class="btn btn-danger" hx-trigger="click" hx-post="/forms/delete_chat?chat_id={{id}}"
+    data-bs-dismiss="modal">Удалить чат</button>
+{% endif %}

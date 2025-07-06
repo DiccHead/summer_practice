@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from auth import UserSessionData, get_session_data
-from db_manager import getAllChatsOfUser, readAllMessagesInChat, getUserByName, updateMessageReadList, updateUserActiveChat, getMessageById
+from db_manager import getAllChatsOfUser, readAllMessagesInChat, getUserByName, updateMessageReadList, updateUserActiveChat, getMessageById, getChatById
 from pydantic import BaseModel
 from datetime import datetime
 import uuid
@@ -35,7 +35,6 @@ class Message(BaseModel):
 def chatlist_element(request: Request, user: UserSessionData = Depends(get_session_data)):
     user = getUserByName(user.username)
     chats = getAllChatsOfUser(user.username)
-    print(chats)
     if chats == []:
         response = templates.TemplateResponse("empty_chatlist.html", context={'request': request})
     chats_final = []
@@ -68,11 +67,12 @@ def chatlist_element(request: Request, user: UserSessionData = Depends(get_sessi
 def open_chat(request: Request, chat_id: uuid.UUID = None, user: UserSessionData = Depends(get_session_data), active_chat=False):
     user = getUserByName(user.username)
     if active_chat:
-        chat_id = user.active_chat
+        chat_id = uuid.UUID(user.active_chat)
     updateUserActiveChat(name=user.username, active_chat=str(chat_id))
     chat_list = user.chatlist.split()
     if str(chat_id) in chat_list:
-        response = templates.TemplateResponse("chat_element.html", context={'request': request, 'id': chat_id, 'user': user})
+        chat = getChatById(chat_id)
+        response = templates.TemplateResponse("chat_element.html", context={'request': request, 'id': chat_id, 'user': user, 'chat': chat})
         return response
 
 
@@ -115,4 +115,36 @@ def edit_message_form(request: Request, message_id: uuid.UUID, user: UserSession
 def new_chat_form(request: Request, user: UserSessionData = Depends(get_session_data)):
     user = getUserByName(user.username)
     response = templates.TemplateResponse("create_chat_form.html", context={'request': request, 'username': user.username})
+    return response
+
+
+@router.get("/edit_chat_form")
+def edit_chat_form(request: Request, chat_id: uuid.UUID, user: UserSessionData = Depends(get_session_data)):
+    user = getUserByName(user.username)
+    if str(chat_id) in user.chatlist.split():
+        is_moderator = False
+        chat = getChatById(chat_id)
+        user_list = chat.user_list.split()
+        moderator_list = chat.moderator_list.split()
+        for i in moderator_list:
+            if i in user_list:
+                user_list.remove(i)
+        chat_name = chat.name
+        if user.username in moderator_list:
+            is_moderator = True
+        user_list = " ".join(user_list)
+        moderator_list = " ".join(moderator_list)
+        response = templates.TemplateResponse("edit_chat_form.html", context={'request': request, 'id': chat_id, 'name': chat_name, 'user_list': user_list, 'moderator_list': moderator_list, 'is_admin': is_moderator, 'username': user.username})
+        return response
+    
+
+@router.get("/get_search", response_class=HTMLResponse)
+def get_search(request: Request):
+    response = templates.TemplateResponse("search_element.html", context={'request': request})
+    return response
+
+
+@router.get("/back_to_chatlist", response_class=HTMLResponse)
+def back_to_chatlist(request: Request):
+    response = templates.TemplateResponse("chatlist_full.html", context={'request': request})
     return response
