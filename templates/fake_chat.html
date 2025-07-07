@@ -1,0 +1,23 @@
+<div class="position-fixed bg-dark text-light right-0 top-0 p-3 d-flex flex-row align-items-center"
+    style="height: 10%; width: 100%; z-index: 2;" hx-target="#active_chat" hx-trigger="click"
+    hx-get="/user/{{user.username}}">
+    <div class="rounded-circle overflow-hidden" style="height: 100px; width: 100px;"><img
+            src="/user_files/user_pictures/{{user.profile_pic}}.jpg" alt="" style="width: 100px; height: auto;"></div>
+    <h4 class="ms-3">{{user.username}}</h4>
+</div>
+<div class="row p-1" id="message_box"
+    style="height: 88%; width: 73%; overflow-x: hidden; overflow-y: auto; position: fixed; bottom: 12%; transform: rotateX(180deg);">
+</div>
+
+<div class="row bg-dark rounded w-50" style="height: 8%; position: fixed; bottom: 2%; right: 8%;">
+    <form class="p-3 row" method="post" hx-post="/forms/new_personal_chat" action="javascript:void(0)" ;>
+        <div class="col-10">
+            <input type="text" class="form-control" id="messageInput" placeholder="Введите сообщение"
+                name="message_content">
+        </div>
+        <input type="text" name="username" value="{{user.username}}" hidden>
+        <div class="col">
+            <button type="submit" class="btn btn-primary rounded-circle"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </form>
+</div>

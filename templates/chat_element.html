@@ -1,5 +1,7 @@
 {% from 'macros.html' import top_bar %}
-{{ top_bar(chat) }}
+<div id="top_bar">
+    {{ top_bar(chat, is_personal) }}
+</div>
 <div class="row p-1" id="message_box" hx-trigger="load" hx-get="/element/get_messages?chat_id={{ id }}"
     style="height: 88%; width: 73%; overflow-x: hidden; overflow-y: auto; position: fixed; bottom: 12%; transform: rotateX(180deg);">
 </div>

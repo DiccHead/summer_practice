@@ -362,6 +362,20 @@ def editMessageById(id: uuid.UUID, message_input: AddMessage):
             return HandleErrors()
         
 
+def updateMessageAuthor(id: uuid.UUID, input: str):
+    with Session(engine) as session:
+        statement = select(Message).where(Message.id == id)
+        result = session.exec(statement)
+        try:
+            message = result.one()
+            message.author = input
+            session.add(message)
+            session.commit()
+            return "Updated author successfuly"
+        except:
+            return HandleErrors()
+        
+
 def updateMessageReadList(id: uuid.UUID, input: str):
     with Session(engine) as session:
         statement = select(Message).where(Message.id == id)

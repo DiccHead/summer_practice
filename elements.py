@@ -20,6 +20,7 @@ class Chat(BaseModel):
     msg_time: str
     is_read: bool
     is_active: bool
+    is_personal: bool = False
 
 
 class Message(BaseModel):
@@ -55,9 +56,16 @@ def chatlist_element(request: Request, user: UserSessionData = Depends(get_sessi
             msg_time = ""
         if str(chat.id) == user.active_chat:
             is_active = True
+        chat_backup = chat
         chat = chat.model_dump()
         chat = Chat(**chat, last_message=last_message, msg_time=msg_time, is_read=is_read, is_active=is_active)
-
+        if len(chat_backup.user_list.split()) == 2 and chat_backup.name == "PersonalChat":
+            chat.is_personal = True
+            user_list = chat_backup.user_list.split()
+            user_list.remove(user.username)
+            interlocutor = getUserByName(user_list[0])
+            chat.name = interlocutor.username
+            chat.picture = interlocutor.profile_pic
         chats_final.append(chat)
     response = templates.TemplateResponse("chat_list.html", context={'request': request, 'chats': chats_final})
     return response
@@ -66,13 +74,22 @@ def chatlist_element(request: Request, user: UserSessionData = Depends(get_sessi
 @router.get("/open_chat", response_class=HTMLResponse)
 def open_chat(request: Request, chat_id: uuid.UUID = None, user: UserSessionData = Depends(get_session_data), active_chat=False):
     user = getUserByName(user.username)
-    if active_chat:
-        chat_id = uuid.UUID(user.active_chat)
+    if active_chat and user != "Guest":
+        if user.active_chat != "":
+            chat_id = uuid.UUID(user.active_chat)
     updateUserActiveChat(name=user.username, active_chat=str(chat_id))
     chat_list = user.chatlist.split()
     if str(chat_id) in chat_list:
         chat = getChatById(chat_id)
-        response = templates.TemplateResponse("chat_element.html", context={'request': request, 'id': chat_id, 'user': user, 'chat': chat})
+        is_personal = False
+        if len(chat.user_list.split()) == 2 and chat.name == "PersonalChat":
+            is_personal = True
+            user_list = chat.user_list.split()
+            user_list.remove(user.username)
+            interlocutor = getUserByName(user_list[0])
+            chat.name = interlocutor.username
+            chat.picture = interlocutor.profile_pic
+        response = templates.TemplateResponse("chat_element.html", context={'request': request, 'id': chat_id, 'user': user, 'chat': chat, 'is_personal': is_personal})
         return response
 
 
@@ -139,12 +156,29 @@ def edit_chat_form(request: Request, chat_id: uuid.UUID, user: UserSessionData =
     
 
 @router.get("/get_search", response_class=HTMLResponse)
-def get_search(request: Request):
+def get_search(request: Request, user: UserSessionData = Depends(get_session_data)):
+    user = getUserByName(user.username)
     response = templates.TemplateResponse("search_element.html", context={'request': request})
     return response
 
 
 @router.get("/back_to_chatlist", response_class=HTMLResponse)
-def back_to_chatlist(request: Request):
-    response = templates.TemplateResponse("chatlist_full.html", context={'request': request})
+def back_to_chatlist(request: Request, user: UserSessionData = Depends(get_session_data)):
+    user = getUserByName(user.username)
+    response = templates.TemplateResponse("chatlist_full.html", context={'request': request, 'name': user.username, 'picture': user.profile_pic})
+    return response
+
+
+@router.get("/user_edit_form", response_class=HTMLResponse)
+def user_edit_form(request: Request, user: UserSessionData = Depends(get_session_data)):
+    user = getUserByName(user.username)
+    response = templates.TemplateResponse("/user_edit_form.html", context={'request': request, 'username': user.username, 'password': user.password})
+    return response
+
+
+@router.get("/fake_chat", response_class=HTMLResponse)
+def fake_chat(request: Request, username: str):
+    user = getUserByName(username)
+    user.password = "Hidden"
+    response = templates.TemplateResponse("fake_chat.html", context={'request': request, 'user': user})
     return response

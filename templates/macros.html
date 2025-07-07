@@ -1,8 +1,9 @@
-{% macro chat_element(picture, name, last_message, msg_time, is_read, is_active, id) %}
+{% macro chat_element(picture, name, last_message, msg_time, is_read, is_active, id, is_personal) %}
 <div {% if is_active==True %} class="row text-light bg-secondary p-2" {% else %} class="row text-light bg-dark p-2"
-    hx-target="#active_chat" hx-trigger="click" hx-get="/element/open_chat?chat_id={{id}}" {% endif %}>
+    hx-target="#active_chat" hx-trigger="click" hx-get="/element/open_chat?chat_id={{id}}" style="cursor: pointer;" {%
+    endif %}>
     <div class="rounded-circle bg-secondary ms-2" style="width: 55px; height: 55px; overflow: hidden;"><img
-            src="/user_files/chat_pictures/{{picture}}.jpg" alt=""
+            src="/user_files/{% if is_personal %}user{% else %}chat{% endif %}_pictures/{{picture}}.jpg" alt=""
             style="width: 55px; height: auto; position: relative; left: -12px;"></div>
     <div class="col-10 ps-4">
         <div class="row">
@@ -27,9 +28,9 @@
 
 {% macro message(is_mine, content, author, is_read, id, is_edited) %}
 {% if is_mine %}
-<div style="min-height: 50px; word-break: break-all;" class="mt-2 d-flex flex-row-reverse" data-bs-toggle="modal"
-    data-bs-target="#exampleModal" hx-target="#modal-content" hx-get="/element/edit_message_form?message_id={{id}}"
-    hx-trigger="click">
+<div style="min-height: 50px; word-break: break-all; cursor: pointer;" class="mt-2 d-flex flex-row-reverse"
+    data-bs-toggle="modal" data-bs-target="#exampleModal" hx-target="#modal-content"
+    hx-get="/element/edit_message_form?message_id={{id}}" hx-trigger="click">
     <div style="height: 100%; max-width: 45%;" class="bg-info rounded p-2 d-flex align-items-end flex-row-reverse">
         <div>{{content}} {% if is_read %}<i class="bi bi-check2-all"></i>{% else %}<i class="bi bi-check2"></i>{% endif
             %} <br>
@@ -63,28 +64,28 @@
             <div class="modal-body" id="modal-content">
                 Редактирование сообщения
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-            </div>
         </div>
     </div>
 </div>
 {% endmacro %}
 
 
-{% macro top_bar(chat) %}
+{% macro top_bar(chat, is_personal) %}
 <div class="position-fixed bg-dark text-light right-0 top-0 p-3 d-flex flex-row align-items-center"
     style="height: 10%; width: 100%; z-index: 2;" data-bs-toggle="modal" data-bs-target="#exampleModal"
     hx-target="#modal-content" hx-get="/element/edit_chat_form?chat_id={{chat.id}}" hx-trigger="click">
     <div class="rounded-circle overflow-hidden" style="height: 100px; width: 100px;"><img
-            src="/user_files/chat_pictures/{{chat.picture}}.jpg" alt="" style="width: 100px; height: auto;"></div>
+            src="/user_files/{% if is_personal %}user{% else %}chat{% endif %}_pictures/{{chat.picture}}.jpg" alt=""
+            style="width: 100px; height: auto;"></div>
     <h4 class="ms-3">{{chat.name}}</h4>
+    <i class="bi bi-pencil mx-3 text-secondary" style="cursor: pointer;"></i>
 </div>
 {% endmacro %}
 
 
 {% macro user_element(picture, name) %}
-<div class="row text-light bg-dark p-2" hx-target="#active_chat" hx-trigger="click" hx-get="/user/{{name}}">
+<div style="cursor: pointer;" class="row text-light bg-dark p-2" hx-target="#active_chat" hx-trigger="click"
+    hx-get="/user/{{name}}">
     <div class="rounded-circle bg-secondary ms-2" style="width: 55px; height: 55px; overflow: hidden;"><img
             src="/user_files/user_pictures/{{picture}}.jpg" alt=""
             style="width: 55px; height: auto; position: relative; left: -12px;"></div>

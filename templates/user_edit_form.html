@@ -1,0 +1,20 @@
+<h5 class="modal-title" id="exampleModalLabel">Редактировать профиль</h5>
+<form class="p-3 col" method="post" action="/forms/edit_user" enctype="multipart/form-data">
+    <div class="row mb-2">
+        <label for="new_username" class="form-label">Имя пользователя:</label>
+        <input type="text" name="new_username" class="form-control" id="new_username" value="{{username}}">
+    </div>
+    <div class="row mb-2">
+        <label for="password" class="form-label">Пароль:</label>
+        <input type="password" name="new_password" class="form-control" id="password" value="{{password}}">
+    </div>
+    <div class="row mb-2">
+        <label for="profile_pic" class="form-label">Фото профиля:</label>
+        <input type="file" name="profile_pic" class="form-control" id="profile_pic">
+    </div>
+    <input type="text" name="username" value="{{username}}" hidden>
+    <input type="text" name="password" value="{{password}}" hidden>
+    <div class="row mb-2">
+        <button type="submit" class="btn btn-primary rounded">Сохранить изменения</button>
+    </div>
+</form>

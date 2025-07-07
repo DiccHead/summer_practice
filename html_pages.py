@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from auth import get_session_data, UserSessionData
+from db_manager import getUserByName, updateUserActiveChat
 
 
 router = APIRouter(tags=["Html"])
@@ -35,7 +36,8 @@ def chats_page(request: Request, active_chat: bool = False, user: UserSessionDat
     if user == "Guest":
         response = RedirectResponse(url='/log-in', status_code=303)
         return response
-    response = templates.TemplateResponse("chats_page.html", context={'request': request, 'page_name': 'chats', 'active_chat': active_chat})
+    user = getUserByName(user.username)
+    response = templates.TemplateResponse("chats_page.html", context={'request': request, 'page_name': 'chats', 'active_chat': active_chat, 'name': user.username, 'picture': user.profile_pic})
     return response
 
 
@@ -44,8 +46,18 @@ def user_profile_page(request: Request, username: str, user: UserSessionData = D
     if user == "Guest":
         response = RedirectResponse(url='/log-in', status_code=303)
         return response
-    response = templates.TemplateResponse("index.html", context={'request': request, 'page_name': username})
-    return response
+    user = getUserByName(user.username)
+    updateUserActiveChat(user.username, "")
+    try:
+        user_profile = getUserByName(username)
+        user_profile.password = "Hidden"
+        is_self = False
+        if user_profile.username == user.username:
+            is_self = True
+        response = templates.TemplateResponse("user_page.html", context={'request': request, 'profile': user_profile, 'is_self': is_self})
+        return response
+    except:
+        return RedirectResponse(url="/warning?error=Такого%20пользователя%20не%20существует.", status_code=303)
 
 
 @router.get("/warning")

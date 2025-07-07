@@ -15,7 +15,7 @@
     {% for chat in chats %}
     {{ chat_element(picture=chat.picture, name=chat.name, last_message=chat.last_message,
     msg_time=chat.msg_time,
-    is_read=chat.is_read, is_active=chat.is_active, id=chat.id) }}
+    is_read=chat.is_read, is_active=chat.is_active, id=chat.id, is_personal=chat.is_personal) }}
     {% endfor %}
 </div>
 <!-- </div>

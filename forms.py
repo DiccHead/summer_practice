@@ -1,13 +1,11 @@
 from datetime import datetime
-import os
 import uuid
-from fastapi import APIRouter, File, Form, Request, UploadFile, Depends
+from fastapi import APIRouter, File, Form, Request, Response, UploadFile, Depends
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from database import User
-from db_manager import addUser, AddUser, deleteChatById, editChatById, getChatById, addMessage, AddMessage, getUserByName, editMessageById, getMessageById, deleteMessageById, AddChat, addChat, updateUserChatlist, updateUserActiveChat, updateChatPicture, updateChatUserList, updateChatModeratorList, user_search
-from auth import UserSessionData, get_session_data
-import pathlib
+from db_manager import addUser, AddUser, deleteChatById, deleteUserByName, editChatById, editUserByName, getChatById, addMessage, AddMessage, getUserByName, editMessageById, getMessageById, deleteMessageById, AddChat, addChat, readAllUsers, updateUserChatlist, updateUserActiveChat, updateChatPicture, updateChatUserList, updateChatModeratorList, user_search, getAllChatsOfUser, readAllMessagesInChat, updateMessageAuthor, updateMessageReadList
+from auth import UserSessionData, get_session_data, logout
 
 router = APIRouter(tags=["Forms"], prefix="/forms")
 
@@ -194,7 +192,7 @@ async def edit_chat(request: Request, name: str = Form(), user_list: str = Form(
                 editChatById(chat_id, new_chat)
         return RedirectResponse(url="/chats", status_code=303)
     except:
-        return RedirectResponse(url="/warning?error=Файл%20должен%20быть%20изображением", status_code=303)
+        return RedirectResponse(url="/warning?error=Вы%20загрузили%20неподходящий%20файл%20или%20указали%20несуществующего%20пользователя.", status_code=303)
 
 
 @router.get("/search_user", response_class=HTMLResponse)
@@ -204,3 +202,150 @@ def search_user(request: Request, search_request: str):
         return templates.TemplateResponse("/user_list.html", context={'request': request, 'users': result, 'nothing': False})
     else:
         return templates.TemplateResponse("/user_list.html", context={'request': request, 'users': result, 'nothing': True})
+    
+
+@router.get("/delete_user", response_class=HTMLResponse)
+def delete_user(request: Request, response: Response, user: UserSessionData = Depends(get_session_data)):
+    chat_list = user.chatlist.split()
+    for chat_id in chat_list:
+        chat_id = uuid.UUID(chat_id)
+        chat = getChatById(chat_id)
+        user_list = chat.user_list.split()
+        user_list.remove(user.username)
+        user_list = " ".join(user_list)
+        moderator_list = chat.moderator_list.split()
+        if user.username in moderator_list.split():
+            moderator_list = chat.moderator_list.split()
+            moderator_list.remove(user.username)
+            moderator_list = " ".join(moderator_list)
+            updateChatModeratorList(chat_id, moderator_list)
+        updateChatUserList(chat_id, user_list)
+    logout(response, request)
+    deleteUserByName(user.username)
+    response = templates.TemplateResponse("index.html", context={"request": request})
+    response.headers["HX-Redirect"] = "/"
+    return response
+
+
+@router.post("/edit_user")
+async def edit_user(response: Response, request: Request, new_username: str = Form(), new_password: str = Form(), profile_pic: UploadFile = File(...), username: str = Form(), password: str = Form()):
+    try:
+        if profile_pic.size != 0:
+            if 'image' in profile_pic.content_type.split('/'):
+                user = getUserByName(username)
+                if user.password == password:
+                    user_list = readAllUsers()
+                    username_list = []
+                    for i in user_list:
+                        username_list.append(i.username)
+                    username_list.remove(username)
+                    if new_username in username_list:
+                        return RedirectResponse(url="/warning?error=Это%20имя%20пользователя%20уже%20занято.", status_code=303)
+                    if " " in new_username:
+                        return RedirectResponse(url="/warning?error=Имя%20пользователя%20не%20должно%20содержать%20пробелов.", status_code=303)
+                    if new_password != "":
+                        password = new_password
+                    new_user = AddUser(username=new_username, password=password, last_online=user.last_online, chatlist=user.chatlist)
+                    if user.profile_pic != 'Guest':
+                        photo_file = open("user_files/user_pictures/"+str(user.profile_pic)+"0"+".jpg", "wb")
+                        new_user.profile_pic = str(user.profile_pic)+"0"
+                    else:
+                        photo_file = open("user_files/user_pictures/"+str(user.id)+".jpg", "wb")
+                        new_user.profile_pic = str(user.id)
+                    chat_list = getAllChatsOfUser(username)
+                    editUserByName(username, new_user)
+                    file_content = await profile_pic.read()
+                    photo_file.write(file_content)
+                    photo_file.close()
+                    for chat in chat_list:
+                        chat_id = chat.id
+                        messages = readAllMessagesInChat(chat_id)
+                        for i in messages:
+                            if i.author == username:
+                                updateMessageAuthor(i.id, new_username)
+                            updateMessageReadList(i.id, i.read_list+" "+new_username)
+                        user_list = chat.user_list.split()
+                        new_user_list = []
+                        for i in user_list:
+                            if i == username:
+                                new_user_list.append(new_username)
+                            else:
+                                new_user_list.append(i)
+                        new_user_list = " ".join(new_user_list)
+                        updateChatUserList(chat_id, new_user_list)
+                        if username in chat.moderator_list.split():
+                            moderator_list = chat.moderator_list.split()
+                            new_moderator_list = []
+                            for i in moderator_list:
+                                if i == username:
+                                    new_moderator_list.append(new_username)
+                                else:
+                                    new_moderator_list.append(i)
+                            new_moderator_list = " ".join(new_moderator_list)
+                            updateChatModeratorList(chat_id, new_moderator_list)
+                    logout(response, request)
+            else:
+                return RedirectResponse(url="/warning?error=Файл%20должен%20быть%20изображением", status_code=303)
+        else:
+            user = getUserByName(username)
+            if user.password == password:
+                user_list = readAllUsers()
+                username_list = []
+                for i in user_list:
+                    username_list.append(i.username)
+                username_list.remove(username)
+                if new_username in username_list:
+                    return RedirectResponse(url="/warning?error=Это%20имя%20пользователя%20уже%20занято.", status_code=303)
+                if " " in new_username:
+                    return RedirectResponse(url="/warning?error=Имя%20пользователя%20не%20должно%20содержать%20пробелов.", status_code=303)
+                if new_password != "":
+                    password = new_password
+                new_user = AddUser(username=new_username, password=password, last_online=user.last_online, chatlist=user.chatlist, profile_pic=user.profile_pic)
+                chat_list = getAllChatsOfUser(username)
+                editUserByName(username, new_user)
+                for chat in chat_list:
+                    chat_id = chat.id
+                    messages = readAllMessagesInChat(chat_id)
+                    for i in messages:
+                        if i.author == username:
+                            updateMessageAuthor(i.id, new_username)
+                        updateMessageReadList(i.id, i.read_list+" "+new_username)
+                    user_list = chat.user_list.split()
+                    new_user_list = []
+                    for i in user_list:
+                        if i == username:
+                            new_user_list.append(new_username)
+                        else:
+                            new_user_list.append(i)
+                    new_user_list = " ".join(new_user_list)
+                    updateChatUserList(chat_id, new_user_list)
+                    if username in chat.moderator_list.split():
+                        moderator_list = chat.moderator_list.split()
+                        new_moderator_list = []
+                        for i in moderator_list:
+                            if i == username:
+                                new_moderator_list.append(new_username)
+                            else:
+                                new_moderator_list.append(i)
+                        new_moderator_list = " ".join(new_moderator_list)
+                        updateChatModeratorList(chat_id, new_moderator_list)
+                logout(response, request)
+        return RedirectResponse(url="/chats", status_code=303)
+    except:
+        return RedirectResponse(url="/warning?error=Вы%20загрузили%20неподходящий%20файл%20или%20указали%20несуществующего%20пользователя.", status_code=303)
+
+
+@router.post("/new_personal_chat", response_class=HTMLResponse)
+def new_personal_chat(request: Request, message_content: str = Form(), username: str = Form(), user: UserSessionData = Depends(get_session_data)):
+    user = getUserByName(user.username)
+    user_list = user.username + " " + username
+    chat = AddChat(name="PersonalChat", user_list=user_list, moderator_list=user_list, picture="Default")
+    is_ok, id = addChat(chat)
+    updateUserChatlist(user.username, user.chatlist+" "+str(id))
+    updateUserChatlist(username, getUserByName(username).chatlist+" "+str(id))
+    message = AddMessage(author=user.username, chat=id, content=message_content)
+    addMessage(message)
+    updateUserActiveChat(user.username, str(id))
+    response = templates.TemplateResponse("index.html", context={"request": request})
+    response.headers["HX-Redirect"] = "/"
+    return response
