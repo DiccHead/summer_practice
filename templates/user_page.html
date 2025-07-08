@@ -16,6 +16,7 @@
             профиль</button>
         <button class="btn btn-danger btn-lg my-3" hx-trigger="click" hx-get="/forms/delete_user">Удалить
             аккаунт</button>
+        <button class="btn btn-danger btn-lg my-3" hx-trigger="click" hx-get="/auth/logout">Выйти</button>
         {% else %}
         <button class="btn btn-primary btn-lg my-3" hx-get="/element/fake_chat?username={{profile.username}}"
             hx-target="#active_chat" hx-trigger="click">Написать сообщение</button>

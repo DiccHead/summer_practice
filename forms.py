@@ -214,7 +214,7 @@ def delete_user(request: Request, response: Response, user: UserSessionData = De
         user_list.remove(user.username)
         user_list = " ".join(user_list)
         moderator_list = chat.moderator_list.split()
-        if user.username in moderator_list.split():
+        if user.username in moderator_list:
             moderator_list = chat.moderator_list.split()
             moderator_list.remove(user.username)
             moderator_list = " ".join(moderator_list)

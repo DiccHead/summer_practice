@@ -71,7 +71,7 @@
 
 
 {% macro top_bar(chat, is_personal) %}
-<div class="position-fixed bg-dark text-light right-0 top-0 p-3 d-flex flex-row align-items-center"
+<div class="position-fixed bg-dark text-light right-0 top-0 p-3 d-flex flex-row align-items-center rounded"
     style="height: 10%; width: 100%; z-index: 2;" data-bs-toggle="modal" data-bs-target="#exampleModal"
     hx-target="#modal-content" hx-get="/element/edit_chat_form?chat_id={{chat.id}}" hx-trigger="click">
     <div class="rounded-circle overflow-hidden" style="height: 100px; width: 100px;"><img

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import uuid
 from fastapi import APIRouter, Depends, Form, Response, Request
@@ -8,6 +9,7 @@ from db_manager import getUserByName, updateUserLastOnline
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+templates = Jinja2Templates(directory="templates")
 
 class UserSessionData(BaseModel):
     id: uuid.UUID
@@ -72,7 +74,7 @@ def check_cookie(user_session_data: UserSessionData = Depends(get_session_data))
     return user_session_data
 
 
-@router.get("/logout")
+@router.get("/logout", response_class=HTMLResponse)
 def logout(response: Response, request: Request):
     try:
         session_id = request.cookies.get(COOKIE_SESSION_ID_KEY)
@@ -80,7 +82,9 @@ def logout(response: Response, request: Request):
         updateUserLastOnline(COOKIES[session_id].username, now)
         COOKIES.pop(session_id)
         response.delete_cookie(COOKIE_SESSION_ID_KEY)
-        return "Goodbye"
+        response = templates.TemplateResponse("index.html", context={"request": request})
+        response.headers["HX-Redirect"] = "/"
+        return response
     except:
         return {"status": "Not authenticated"}
     
